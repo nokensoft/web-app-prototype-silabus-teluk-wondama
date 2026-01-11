@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alexandra Wijaya | Fotografer</title>
+  <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #000;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: #D4AF37;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: flex-end;
+      list-style: none;
+    }
+
+    nav li {
+      margin-left: 30px;
+    }
+
+    nav a {
+      font-size: 18px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3') no-repeat center center/cover;
+      color: #fff;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin-bottom: 20px;
+      color: #D4AF37;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Gallery */
+    .gallery {
+      padding: 80px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 50px;
+      color: #D4AF37;
+      font-weight: 300;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .gallery-item {
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* About */
+    .about {
+      padding: 80px 0;
+      background: #0a0a0a;
+    }
+
+    .about-content {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .about-content p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    /* Contact */
+    .contact {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .contact a {
+      font-size: 1.2rem;
+      display: inline-block;
+      margin-top: 15px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      background: #000;
+      border-top: 1px solid #222;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      nav ul {
+        justify-content: center;
+      }
+      nav li {
+        margin: 0 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <nav>
+        <ul>
+          <li><a href="#gallery">Karya</a></li>
+          <li><a href="#about">Tentang</a></li>
+          <li><a href="#contact">Kontak</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div>
+      <h1>ALEXANDRA WIJAYA</h1>
+      <p>Fotografer Potret & Gaya Hidup — Menangkap Keindahan dalam Setiap Detik</p>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="gallery">
+    <div class="container">
+      <h2 class="section-title">KARYA TERPILIH</h2>
+      <div class="gallery-grid">
+        <!-- Ganti src dengan foto asli Anda -->
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2" alt="Foto 1"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e" alt="Foto 2"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1501854140801-50d01698950b" alt="Foto 3"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622" alt="Foto 4"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8" alt="Foto 5"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e" alt="Foto 6"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="about">
+    <div class="container">
+      <h2 class="section-title">TENTANG SAYA</h2>
+      <div class="about-content">
+        <p>
+          Saya Alexandra, seorang fotografer berbasis di Jakarta yang percaya bahwa setiap momen memiliki cerita yang layak dikenang.
+          Dengan latar belakang seni visual dan kecintaan pada cahaya alami, saya menggabungkan estetika klasik dengan sentuhan modern.
+        </p>
+        <p>
+          Klien saya berkisar dari individu, pasangan, hingga merek ternama—semua menyatu dalam visi yang sama: keindahan yang autentik.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2 class="section-title">HUBUNGI SAYA</h2>
+      <p>Siap memulai proyek bersama?</p>
+      <a href="mailto:hello@alexandraphoto.com">hello@alexandraphoto.com</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      &copy; 2026 Alexandra Wijaya. All rights reserved.
+    </div>
+  </footer>
+
+</body>
+</html>

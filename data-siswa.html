@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekapitulasi Data Siswa - Sistem Informasi Laporan Bulanan Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .bg-main { background-color: #f0f9ff; }
+        .sidebar-active { background-color: #e0f2fe; color: #0369a1; border-right: 4px solid #0369a1; }
+    </style>
+</head>
+<body class="bg-main text-slate-700" x-data="{ 
+    sidebarOpen: true, 
+    searchQuery: '',
+    showModal: false,
+    selectedSchool: {},
+    currentPage: 1,
+    pageSize: 5,
+    rekapSiswa: [
+        {id: 1, npsn: '10203001', nama: 'SD Negeri 01 Jayapura', laki: 150, perempuan: 170},
+        {id: 2, npsn: '10203002', nama: 'SD Negeri 02 Jayapura', laki: 120, perempuan: 130},
+        {id: 3, npsn: '10203003', nama: 'SD Kristen Harapan', laki: 95, perempuan: 105},
+        {id: 4, npsn: '10203004', nama: 'SMP Negeri 01 Jayapura', laki: 310, perempuan: 290},
+        {id: 5, npsn: '10203005', nama: 'SMP Negeri 02 Jayapura', laki: 280, perempuan: 320},
+        {id: 6, npsn: '10203006', nama: 'SMA Negeri 01 Jayapura', laki: 450, perempuan: 480},
+        {id: 7, npsn: '10203007', nama: 'SMA YPPK Teruna Bakti', laki: 200, perempuan: 215},
+        {id: 8, npsn: '10203008', nama: 'SMK Negeri 01 Jayapura', laki: 500, perempuan: 350},
+        {id: 9, npsn: '10203009', nama: 'SD Inpres 01 Sentani', laki: 80, perempuan: 85},
+        {id: 10, npsn: '10203010', nama: 'SD Muhammadiyah 1', laki: 110, perempuan: 115}
+    ],
+    get filteredData() {
+        return this.rekapSiswa.filter(s => s.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) || s.npsn.includes(this.searchQuery));
+    },
+    get pagedData() {
+        let start = (this.currentPage - 1) * this.pageSize;
+        return this.filteredData.slice(start, start + this.pageSize);
+    },
+    get totalPages() {
+        return Math.ceil(this.filteredData.length / this.pageSize);
+    }
+}">
+
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="fixed left-0 top-0 h-screen bg-white shadow-md transition-all duration-300 hidden lg:flex flex-col z-50">
+        <div class="p-4 border-b flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 overflow-hidden">
+                <div class="bg-blue-600 p-2 rounded-lg text-white"><i class="fas fa-school"></i></div>
+                <span class="font-bold text-sm whitespace-nowrap" x-show="sidebarOpen">SILB SEKOLAH</span>
+            </a>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-slate-100 transition group">
+                <i class="fas fa-th-large w-6"></i>
+                <span x-show="sidebarOpen" class="ml-3 font-medium">Dasbor</span>
+            </a>
+            <div x-data="{ open: true }">
+                <button @click="open = !open" class="w-full flex items-center p-3 rounded-lg text-blue-600 font-bold">
+                    <i class="fas fa-edit w-6"></i>
+                    <span x-show="sidebarOpen" class="ml-3 flex-1 text-left">Input Data</span>
+                    <i x-show="sidebarOpen" class="fas fa-chevron-down text-xs transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open && sidebarOpen" x-cloak class="ml-9 space-y-1 mt-1 text-sm border-l-2 border-blue-100 pl-2">
+                    <a href="data-sekolah.html" class="block p-2 hover:text-blue-600">Data Sekolah</a>
+                    <a href="data-siswa.html" class="block p-2 text-blue-700 font-bold bg-blue-50 rounded-md">Data Siswa</a>
+                    <a href="data-ptk.html" class="block p-2 hover:text-blue-600">Data PTK</a>
+                    <a href="data-sarpras.html" class="block p-2 hover:text-blue-600">Data Sarpras</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen">
+        
+        <header class="bg-white shadow-sm p-4 sticky top-0 z-40 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-slate-500 hover:text-blue-600"><i class="fas fa-bars-staggered text-xl"></i></button>
+                <div class="text-xs lg:text-sm font-medium bg-blue-50 px-3 py-1.5 rounded-full text-blue-700" x-data="{ timer: '' }" x-init="setInterval(() => { timer = new Date().toLocaleString('id-ID') }, 1000)">
+                    <i class="far fa-clock mr-2"></i><span x-text="timer"></span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold">Admin Utama</p>
+                    <p class="text-xs text-slate-500">Administrator</p>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=Admin+Sekolah&background=0369a1&color=fff" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+            </div>
+        </header>
+
+        <section class="p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-slate-800">Rekapitulasi Siswa</h1>
+                <p class="text-slate-500 text-sm">Rekapitulasi jumlah siswa laki-laki dan perempuan per sekolah.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-white">
+                <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
+                    <div class="relative w-full md:w-80">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Cari Sekolah atau NPSN..." class="w-full pl-10 pr-4 py-2 rounded-xl border focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4">NPSN</th>
+                                <th class="px-6 py-4">Nama Sekolah</th>
+                                <th class="px-6 py-4 text-center">Laki-Laki</th>
+                                <th class="px-6 py-4 text-center">Perempuan</th>
+                                <th class="px-6 py-4 text-center bg-blue-50/50">Total Siswa</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y text-sm">
+                            <template x-for="item in pagedData" :key="item.id">
+                                <tr class="hover:bg-blue-50/30 transition">
+                                    <td class="px-6 py-4 font-mono text-xs text-blue-600" x-text="item.npsn"></td>
+                                    <td class="px-6 py-4 font-semibold text-slate-700" x-text="item.nama"></td>
+                                    <td class="px-6 py-4 text-center text-blue-600 font-medium" x-text="item.laki"></td>
+                                    <td class="px-6 py-4 text-center text-pink-600 font-medium" x-text="item.perempuan"></td>
+                                    <td class="px-6 py-4 text-center font-bold bg-blue-50/30" x-text="item.laki + item.perempuan"></td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex justify-center">
+                                            <button @click="selectedSchool = item; showModal = true" class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition text-xs font-bold">
+                                                <i class="fas fa-circle-info"></i> Lihat Detail
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 border-t bg-slate-50 flex justify-between items-center text-sm">
+                    <span class="text-slate-500">Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span></span>
+                    <div class="flex gap-1">
+                        <button @click="currentPage > 1 && currentPage--" :disabled="currentPage === 1" class="p-2 disabled:opacity-30"><i class="fas fa-chevron-left"></i></button>
+                        <button @click="currentPage < totalPages && currentPage++" :disabled="currentPage === totalPages" class="p-2 disabled:opacity-30"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="p-6 text-center text-slate-400 text-xs">
+            <p>&copy; 2026 - Powered by <a href="https://www.nokensoft.com" class="text-blue-500 font-semibold hover:underline">Nokensoft</a></p>
+        </footer>
+    </main>
+
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden transition-all transform" @click.away="showModal = false">
+            
+            <div class="p-4 border-b flex justify-between items-center bg-blue-600 text-white">
+                <div>
+                    <h3 class="font-bold text-lg" x-text="selectedSchool.nama"></h3>
+                    <p class="text-xs opacity-80" x-text="'NPSN: ' + selectedSchool.npsn"></p>
+                </div>
+                <button @click="showModal = false" class="hover:bg-blue-700 p-2 rounded-full transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[calc(95vh-130px)]">
+                
+                <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+                    <div class="w-full md:w-64">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Tahun Ajaran</label>
+                        <div class="relative">
+                            <select class="w-full border-2 border-blue-100 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 bg-blue-50/50 font-bold text-blue-700 appearance-none">
+                                <option>2023/2024</option>
+                                <option selected>2024/2025</option>
+                                <option>2025/2026</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="px-4 border-r">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Total L</p>
+                            <p class="text-lg font-black text-blue-600" x-text="selectedSchool.laki"></p>
+                        </div>
+                        <div class="px-4">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Total P</p>
+                            <p class="text-lg font-black text-pink-600" x-text="selectedSchool.perempuan"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border rounded-xl overflow-hidden shadow-sm border-slate-200">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px] text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th rowspan="2" class="px-4 py-4 text-center border-r border-slate-700 sticky left-0 bg-slate-800 z-10">Bulan</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-700">Kelas I</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-800">Kelas II</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-700">Kelas III</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-800">Kelas IV</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-700">Kelas V</th>
+                                    <th colspan="2" class="px-2 py-2 text-center border-r border-slate-700 bg-slate-800">Kelas VI</th>
+                                    <th colspan="2" class="px-2 py-2 text-center bg-blue-900 border-r border-blue-800">Total Akhir</th>
+                                    <th rowspan="2" class="px-4 py-4 text-center bg-slate-900">JML</th>
+                                </tr>
+                                <tr class="bg-slate-100 text-slate-600 border-b">
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-200">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-slate-300 text-slate-800 font-bold">P</th>
+                                    <th class="px-2 py-1 text-center border-r border-blue-200 bg-blue-50 text-blue-700">L</th>
+                                    <th class="px-2 py-1 text-center border-r border-blue-200 bg-blue-50 text-blue-700">P</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y bg-white">
+                                <template x-for="bulan in ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']">
+                                    <tr class="hover:bg-blue-50/30 transition">
+                                        <td class="px-4 py-2 font-bold text-slate-700 border-r border-slate-100 sticky left-0 bg-white" x-text="bulan"></td>
+                                        <td class="px-2 py-2 text-center border-r">12</td><td class="px-2 py-2 text-center border-r border-slate-200 bg-slate-50/50">13</td>
+                                        <td class="px-2 py-2 text-center border-r">14</td><td class="px-2 py-2 text-center border-r border-slate-200 bg-slate-50/50">14</td>
+                                        <td class="px-2 py-2 text-center border-r">15</td><td class="px-2 py-2 text-center border-r border-slate-200 bg-slate-50/50">15</td>
+                                        <td class="px-2 py-2 text-center border-r">10</td><td class="px-2 py-2 text-center border-r border-slate-200 bg-slate-50/50">14</td>
+                                        <td class="px-2 py-2 text-center border-r">16</td><td class="px-2 py-2 text-center border-r border-slate-200 bg-slate-50/50">16</td>
+                                        <td class="px-2 py-2 text-center border-r">13</td><td class="px-2 py-2 text-center border-r border-slate-300 bg-slate-50/50 font-semibold">13</td>
+                                        <td class="px-2 py-2 text-center font-bold text-blue-600 bg-blue-50 border-r border-blue-100">80</td>
+                                        <td class="px-2 py-2 text-center font-bold text-pink-600 bg-pink-50 border-r border-blue-100">85</td>
+                                        <td class="px-4 py-2 text-center font-black bg-slate-100 text-slate-800">165</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t flex justify-between items-center">
+                <div class="flex gap-4">
+                    <button class="flex items-center gap-2 text-green-600 text-xs font-bold hover:bg-green-50 px-3 py-2 rounded-lg transition border border-transparent hover:border-green-200">
+                        <i class="fas fa-file-excel"></i> Ekspor Excel
+                    </button>
+                    <button class="flex items-center gap-2 text-red-600 text-xs font-bold hover:bg-red-50 px-3 py-2 rounded-lg transition border border-transparent hover:border-red-200">
+                        <i class="fas fa-file-pdf"></i> Cetak PDF
+                    </button>
+                </div>
+                <button @click="showModal = false" class="px-8 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition shadow-lg shadow-slate-200">
+                    Tutup Jendela
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex justify-around p-3 z-50 shadow-2xl">
+        <a href="index.html" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px] mt-1">Dasbor</span>
+        </a>
+        <a href="data-sekolah.html" class="flex flex-col items-center text-blue-600">
+            <div class="relative"><i class="fas fa-edit text-lg"></i><span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full"></span></div>
+            <span class="text-[10px] mt-1 font-bold">Data</span>
+        </a>
+        <a href="laporan-bulanan.html" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-file-lines text-lg"></i>
+            <span class="text-[10px] mt-1">Laporan</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-slate-400">
+            <div class="w-6 h-6 rounded-full overflow-hidden border border-slate-200">
+                <img src="https://ui-avatars.com/api/?name=Admin+Sekolah&background=0369a1&color=fff">
+            </div>
+            <span class="text-[10px] mt-1">Profil</span>
+        </a>
+    </nav>
+</body>
+</html>

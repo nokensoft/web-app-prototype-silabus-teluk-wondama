@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Laporan Bulanan Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .bg-main { background-color: #f0f9ff; }
+        .sidebar-active { background-color: #e0f2fe; color: #0369a1; border-right: 4px solid #0369a1; }
+    </style>
+</head>
+<body class="bg-main text-slate-700" x-data="{ sidebarOpen: true, profileOpen: false }">
+
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="fixed left-0 top-0 h-screen bg-white shadow-md transition-all duration-300 hidden lg:flex flex-col z-50">
+        <div class="p-4 border-b flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fas fa-school"></i>
+                </div>
+                <span class="font-bold text-sm tracking-tight whitespace-nowrap" x-show="sidebarOpen">SILB WONDAMA</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <a href="index.html" class="flex items-center p-3 rounded-lg sidebar-active transition">
+                <i class="fas fa-th-large w-6"></i>
+                <span x-show="sidebarOpen" class="ml-3 font-medium">Dasbor</span>
+            </a>
+
+            <div x-data="{ open: false }">
+                <button @click="open = !open" class="w-full flex items-center p-3 rounded-lg hover:bg-slate-100 transition group text-slate-600">
+                    <i class="fas fa-edit w-6 group-hover:text-blue-600"></i>
+                    <span x-show="sidebarOpen" class="ml-3 flex-1 text-left font-medium">Input Data</span>
+                    <i x-show="sidebarOpen" class="fas fa-chevron-down text-[10px] transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                
+                <div x-show="open && sidebarOpen" x-cloak x-transition class="ml-9 space-y-1 mt-1 text-sm border-l-2 border-blue-50 pl-2 text-slate-500">
+                    <a href="data-sekolah.html" class="block p-2 rounded-md hover:text-blue-600 transition">Data Sekolah</a>
+                    <a href="data-siswa.html" class="block p-2 rounded-md hover:text-blue-600 transition">Data Siswa</a>
+                    <a href="data-ptk.html" class="block p-2 rounded-md hover:text-blue-600 transition">Data PTK</a>
+                    <a href="data-sarpras.html" class="block p-2 rounded-md hover:text-blue-600 transition">Data Sarpras</a>
+                </div>
+            </div>
+
+            <div x-data="{ open: false }">
+                <button @click="open = !open" class="w-full flex items-center p-3 rounded-lg hover:bg-slate-100 transition group text-slate-600">
+                    <i class="fas fa-file-lines w-6 group-hover:text-blue-600"></i>
+                    <span x-show="sidebarOpen" class="ml-3 flex-1 text-left font-medium">Laporan</span>
+                    <i x-show="sidebarOpen" class="fas fa-chevron-down text-[10px] transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                
+                <div x-show="open && sidebarOpen" x-cloak x-transition class="ml-9 space-y-1 mt-1 text-sm border-l-2 border-blue-50 pl-2 text-slate-500">
+                    <a href="laporan-bulanan.html" class="block p-2 rounded-md hover:text-blue-600 transition">Lap. Bulanan</a>
+                    <a href="laporan-siswa.html" class="block p-2 rounded-md hover:text-blue-600 transition">Rekap Siswa</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pb-20 lg:pb-0">
+        
+        <header class="bg-white shadow-sm p-4 sticky top-0 z-40 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-slate-500 hover:text-blue-600">
+                    <i class="fas fa-bars-staggered text-xl"></i>
+                </button>
+                <div class="text-xs lg:text-sm font-medium bg-blue-50 px-3 py-1.5 rounded-full text-blue-700">
+                    <i class="far fa-clock mr-2"></i>
+                    <span x-data="{ timer: '' }" x-init="setInterval(() => { timer = new Date().toLocaleTimeString('id-ID') }, 1000)" x-text="timer"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 relative">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold">Admin Utama</p>
+                    <p class="text-xs text-slate-500">Administrator</p>
+                </div>
+                <button @click="profileOpen = !profileOpen" class="focus:outline-none">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Sekolah&background=0369a1&color=fff" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+                </button>
+                
+                <div x-show="profileOpen" @click.away="profileOpen = false" x-cloak 
+                    class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-2 z-50">
+                    <a href="#" class="block px-4 py-2 text-sm hover:bg-blue-50 rounded-lg"><i class="fas fa-user-circle mr-2"></i> Profil</a>
+                    <a href="#" class="block px-4 py-2 text-sm hover:bg-blue-50 rounded-lg"><i class="fas fa-cog mr-2"></i> Pengaturan</a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><i class="fas fa-sign-out-alt mr-2"></i> Keluar</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="p-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-slate-800">Dasbor Utama</h1>
+                <p class="text-slate-500 text-sm">Selamat datang kembali di SILB Kabupaten Teluk Wondama.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-bold mb-4 uppercase tracking-widest text-slate-400">Statistik Guru (PTK)</h3>
+                    <div class="h-64"><canvas id="chartGuru"></canvas></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-bold mb-4 uppercase tracking-widest text-slate-400">Siswa per Jenjang</h3>
+                    <div class="h-64"><canvas id="chartSiswa"></canvas></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-1 md:col-span-2">
+                    <h3 class="text-xs font-bold mb-4 uppercase tracking-widest text-slate-400">Kondisi Sarpras</h3>
+                    <div class="h-64"><canvas id="chartSarpras"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="p-6 text-center text-slate-400 text-xs mt-auto">
+            <p>&copy; 2026 - <span class="font-semibold text-blue-500">Dinas Pendidikan Teluk Wondama</span></p>
+        </footer>
+    </main>
+
+    <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex justify-around p-3 z-50">
+        <a href="index.html" class="flex flex-col items-center text-blue-600">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px] mt-1 font-bold">Dasbor</span>
+        </a>
+        <a href="data-sekolah.html" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-edit text-lg"></i>
+            <span class="text-[10px] mt-1 font-medium">Data</span>
+        </a>
+        <a href="laporan-bulanan.html" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-file-lines text-lg"></i>
+            <span class="text-[10px] mt-1 font-medium">Laporan</span>
+        </a>
+        <button @click="profileOpen = !profileOpen" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px] mt-1 font-medium">Profil</span>
+        </button>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+            };
+
+            new Chart(document.getElementById('chartGuru'), {
+                type: 'pie',
+                data: {
+                    labels: ['ASN', 'PPPK', 'Honorer'],
+                    datasets: [{ data: [10, 4, 2], backgroundColor: ['#0369a1', '#38bdf8', '#bae6fd'], borderWidth: 0 }]
+                },
+                options: commonOptions
+            });
+
+            new Chart(document.getElementById('chartSiswa'), {
+                type: 'bar',
+                data: {
+                    labels: ['SD', 'SMP', 'SMA', 'SMK'],
+                    datasets: [{ label: 'Siswa', data: [450, 380, 320, 210], backgroundColor: '#0ea5e9', borderRadius: 6 }]
+                },
+                options: commonOptions
+            });
+
+            new Chart(document.getElementById('chartSarpras'), {
+                type: 'bar',
+                data: {
+                    labels: ['Ruang', 'Meja', 'Lab'],
+                    datasets: [
+                        { label: 'Baik', data: [12, 40, 5], backgroundColor: '#10b981' },
+                        { label: 'Rusak', data: [2, 10, 1], backgroundColor: '#ef4444' }
+                    ]
+                },
+                options: commonOptions
+            });
+        });
+    </script>
+</body>
+</html>

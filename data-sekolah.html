@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Sekolah - SILB WONDAMA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .bg-main {
+            background-color: #f0f9ff;
+        }
+
+        .sidebar-active {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border-right: 4px solid #0369a1;
+        }
+    </style>
+</head>
+
+<body class="bg-main text-slate-700" x-data="{ 
+    sidebarOpen: true, 
+    profileOpen: false,
+    searchQuery: '',
+    showModal: false,
+    showDeleteModal: false,
+    modalType: '',
+    deleteId: null,
+    currentPage: 1,
+    pageSize: 5,
+    schools: [
+        {id: 1, npsn: '60401812', nama: 'SD Inpres Rasiei', status: 'Negeri', akreditasi: 'B', alamat: 'Jl. Perkantoran Rasiei, Teluk Wondama', telp: '0811-4850-xxx', email: 'sdinpres.rasiei@gmail.com', web: 'sdinpresrasiei.sch.id'},
+        {id: 2, npsn: '60401805', nama: 'SD Negeri Wasior I', status: 'Negeri', akreditasi: 'A', alamat: 'Jl. Pendidikan No. 01 Wasior', telp: '0821-9980-xxx', email: 'sdn1wasior@yahoo.com', web: 'sdn1wasior.sch.id'},
+        {id: 3, npsn: '60401824', nama: 'SMP Negeri Wasior', status: 'Negeri', akreditasi: 'A', alamat: 'Wasior, Distrik Wasior', telp: '0812-4040-xxx', email: 'smpnwasior@wondamakab.go.id', web: 'smpnwasior.sch.id'},
+        {id: 4, npsn: '60401830', nama: 'SMA Negeri 01 Wondama', status: 'Negeri', akreditasi: 'A', alamat: 'Jl. Topai, Wasior', telp: '0852-5400-xxx', email: 'sman1wondama@gmail.com', web: 'sman1wondama.sch.id'},
+        {id: 5, npsn: '60403712', nama: 'SMK Negeri 1 Teluk Wondama', status: 'Negeri', akreditasi: 'B', alamat: 'Miei, Distrik Wasior', telp: '0811-4870-xxx', email: 'smkn1wondama@gmail.com', web: 'smkn1wondama.sch.id'},
+        {id: 6, npsn: '60401815', nama: 'SD Jemaat Kristen Miei', status: 'Swasta', akreditasi: 'B', alamat: 'Bukit Zaitun Miei, Wasior', telp: '-', email: 'sd.miei@wondama.com', web: '-'},
+        {id: 7, npsn: '60401832', nama: 'SMA YPPGI Wasior', status: 'Swasta', akreditasi: 'C', alamat: 'Wasior II, Teluk Wondama', telp: '0813-2200-xxx', email: 'yppgi.wasior@gmail.com', web: '-'}
+    ],
+    selectedSchool: {},
+    
+    get filteredSchools() {
+        return this.schools.filter(s => 
+            s.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+            s.npsn.includes(this.searchQuery)
+        );
+    },
+    get pagedSchools() {
+        let start = (this.currentPage - 1) * this.pageSize;
+        return this.filteredSchools.slice(start, start + parseInt(this.pageSize));
+    },
+    get totalPages() {
+        return Math.ceil(this.filteredSchools.length / this.pageSize);
+    },
+    saveSchool() {
+        if(this.modalType === 'Tambah') {
+            const newId = this.schools.length + 1;
+            this.schools.push({...this.selectedSchool, id: newId});
+        } else {
+            const index = this.schools.findIndex(s => s.id === this.selectedSchool.id);
+            if(index !== -1) this.schools[index] = {...this.selectedSchool};
+        }
+        this.showModal = false;
+    }
+}">
+
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'"
+        class="fixed left-0 top-0 h-screen bg-white shadow-md transition-all duration-300 hidden lg:flex flex-col z-50">
+        <div class="p-4 border-b flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fas fa-school"></i>
+                </div>
+                <span class="font-bold text-sm tracking-tight whitespace-nowrap" x-show="sidebarOpen">SILB
+                    WONDAMA</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-slate-100 transition text-slate-600">
+                <i class="fas fa-th-large w-6"></i>
+                <span x-show="sidebarOpen" class="ml-3 font-medium">Dasbor</span>
+            </a>
+
+            <div x-data="{ open: true }">
+                <button @click="open = !open"
+                    class="w-full flex items-center p-3 rounded-lg bg-blue-50 text-blue-700 font-bold transition">
+                    <i class="fas fa-edit w-6 text-blue-600"></i>
+                    <span x-show="sidebarOpen" class="ml-3 flex-1 text-left font-medium">Input Data</span>
+                    <i x-show="sidebarOpen" class="fas fa-chevron-down text-[10px] transition-transform duration-300"
+                        :class="open ? 'rotate-180' : ''"></i>
+                </button>
+
+                <div x-show="open && sidebarOpen" x-cloak
+                    class="ml-9 space-y-1 mt-1 text-sm border-l-2 border-blue-50 pl-2">
+                    <a href="data-sekolah.html"
+                        class="block p-2 rounded-md text-blue-600 font-bold bg-blue-50/50 transition">Data Sekolah</a>
+                    <a href="#" class="block p-2 rounded-md hover:text-blue-600 transition text-slate-500">Data
+                        Siswa</a>
+                    <a href="#" class="block p-2 rounded-md hover:text-blue-600 transition text-slate-500">Data PTK</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'" class="transition-all duration-300 min-h-screen pb-20 lg:pb-0">
+
+        <header class="bg-white shadow-sm p-4 sticky top-0 z-40 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-slate-500 hover:text-blue-600">
+                    <i class="fas fa-bars-staggered text-xl"></i>
+                </button>
+                <div class="text-xs lg:text-sm font-medium bg-blue-50 px-3 py-1.5 rounded-full text-blue-700">
+                    <i class="far fa-clock mr-2"></i>
+                    <span x-data="{ timer: '' }"
+                        x-init="setInterval(() => { timer = new Date().toLocaleTimeString('id-ID') }, 1000)"
+                        x-text="timer"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 relative">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold">Admin Utama</p>
+                    <p class="text-xs text-slate-500">Administrator</p>
+                </div>
+                <button @click="profileOpen = !profileOpen" class="focus:outline-none">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Sekolah&background=0369a1&color=fff"
+                        class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
+                </button>
+
+                <div x-show="profileOpen" @click.away="profileOpen = false" x-cloak
+                    class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-2 z-50">
+                    <a href="#" class="block px-4 py-2 text-sm hover:bg-blue-50 rounded-lg text-slate-600"><i
+                            class="fas fa-user-circle mr-2"></i> Profil</a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"><i
+                            class="fas fa-sign-out-alt mr-2"></i> Keluar</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Manajemen Sekolah</h1>
+                    <p class="text-slate-500 text-sm">Daftar instansi pendidikan di Kabupaten Teluk Wondama.</p>
+                </div>
+                <button
+                    @click="modalType = 'Tambah'; selectedSchool = {status:'Negeri', akreditasi:'B'}; showModal = true"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 flex items-center gap-2 transition w-fit font-semibold">
+                    <i class="fas fa-plus-circle"></i> Tambah Sekolah
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 bg-slate-50/50 border-b flex flex-col md:flex-row justify-between gap-4">
+                    <div class="relative w-full md:w-80">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Cari NPSN atau Nama..."
+                            class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4">NPSN</th>
+                                <th class="px-6 py-4">Informasi Sekolah</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Akreditasi</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <template x-for="school in pagedSchools" :key="school.id">
+                                <tr class="hover:bg-blue-50/30 transition">
+                                    <td class="px-6 py-4 font-mono text-blue-600 text-xs font-bold"
+                                        x-text="school.npsn"></td>
+                                    <td class="px-6 py-4 font-bold text-slate-700" x-text="school.nama"></td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            :class="school.status === 'Negeri' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'"
+                                            class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                                            x-text="school.status"></span>
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-slate-600">
+                                        <i class="fas fa-award text-amber-400 mr-1"></i> <span
+                                            x-text="school.akreditasi"></span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex justify-center gap-2">
+                                            <button
+                                                @click="selectedSchool = {...school}; modalType = 'Detail'; showModal = true"
+                                                class="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition"><i
+                                                    class="fas fa-eye text-xs"></i></button>
+                                            <button
+                                                @click="selectedSchool = {...school}; modalType = 'Ubah'; showModal = true"
+                                                class="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition"><i
+                                                    class="fas fa-pen text-xs"></i></button>
+                                            <button @click="deleteId = school.id; showDeleteModal = true"
+                                                class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"><i
+                                                    class="fas fa-trash text-xs"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    class="p-4 bg-slate-50 border-t flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+                    <span class="text-slate-500 font-medium">Menampilkan <span x-text="pagedSchools.length"
+                            class="text-slate-800"></span> dari <span x-text="filteredSchools.length"
+                            class="text-slate-800"></span> data</span>
+                    <div class="flex items-center gap-1">
+                        <button @click="currentPage--" :disabled="currentPage === 1"
+                            class="px-2 py-1 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-30"><i
+                                class="fas fa-chevron-left"></i></button>
+                        <template x-for="i in totalPages" :key="i">
+                            <button @click="currentPage = i"
+                                :class="currentPage === i ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'"
+                                class="w-8 h-8 rounded-lg border font-bold transition" x-text="i"></button>
+                        </template>
+                        <button @click="currentPage++" :disabled="currentPage === totalPages"
+                            class="px-2 py-1 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-30"><i
+                                class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="p-6 text-center text-slate-400 text-xs">
+            <p>&copy; 2026 - <span class="font-semibold text-blue-500">Dinas Pendidikan Teluk Wondama</span></p>
+        </footer>
+    </main>
+
+    <div x-show="showModal" x-cloak
+        class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl w-full overflow-hidden transition-all duration-300"
+            :class="modalType === 'Detail' ? 'max-w-2xl' : 'max-w-lg'" @click.away="showModal = false">
+
+            <div class="px-6 py-4 border-b flex justify-between items-center bg-white">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                        <i
+                            :class="modalType === 'Tambah' ? 'fas fa-plus' : (modalType === 'Ubah' ? 'fas fa-edit' : 'fas fa-school')"></i>
+                    </div>
+                    <span x-text="modalType + ' Sekolah'"></span>
+                </h3>
+                <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 transition"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <div class="p-6">
+                <template x-if="modalType === 'Detail'">
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                            <div class="w-16 h-16 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 text-2xl font-black"
+                                x-text="selectedSchool.akreditasi"></div>
+                            <div>
+                                <h4 class="text-xl font-bold text-slate-800" x-text="selectedSchool.nama"></h4>
+                                <p class="text-blue-600 text-sm font-semibold" x-text="'NPSN: ' + selectedSchool.npsn">
+                                </p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px] mb-1">Status</p>
+                                <p class="font-semibold" x-text="selectedSchool.status"></p>
+                            </div>
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px] mb-1">Email</p>
+                                <p class="font-semibold" x-text="selectedSchool.email"></p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-slate-400 font-bold uppercase text-[10px] mb-1">Alamat</p>
+                                <p class="font-semibold leading-relaxed" x-text="selectedSchool.alamat"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+
+                <div x-show="showModal" x-cloak
+                    class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+
+                    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transition-all duration-300 flex flex-col my-8 shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+                        @click.away="showModal = false" style="max-height: 90vh;">
+
+                        <div class="px-6 py-5 border-b flex justify-between items-center bg-white shrink-0">
+                            <div class="flex items-center gap-4">
+                                <div :class="modalType === 'Tambah' ? 'bg-blue-600' : 'bg-amber-500'"
+                                    class="w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg transition-colors duration-500">
+                                    <i :class="modalType === 'Tambah' ? 'fas fa-plus' : 'fas fa-edit'"
+                                        class="text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-slate-800 text-lg leading-none"
+                                        x-text="modalType + ' Data Sekolah'"></h3>
+                                    <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-1.5">
+                                        Kabupaten Teluk Wondama</p>
+                                </div>
+                            </div>
+                            <button @click="showModal = false"
+                                class="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-100 text-slate-400 transition-all">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-6 space-y-10 custom-scrollbar bg-white">
+
+                            <template x-if="modalType === 'Tambah' || modalType === 'Ubah'">
+                                <div class="space-y-10">
+
+                                    <div class="space-y-5">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-8 h-1 bg-blue-600 rounded-full"></span>
+                                            <h4
+                                                class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                Identitas Utama</h4>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div class="md:col-span-2">
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama
+                                                    Lengkap Sekolah</label>
+                                                <input type="text" x-model="selectedSchool.nama"
+                                                    placeholder="Masukkan nama sekolah..."
+                                                    class="w-full mt-2 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-slate-300">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NPSN</label>
+                                                <input type="text" x-model="selectedSchool.npsn"
+                                                    placeholder="Contoh: 6040xxxx"
+                                                    class="w-full mt-2 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status
+                                                    & Akreditasi</label>
+                                                <div class="flex gap-2 mt-2">
+                                                    <select x-model="selectedSchool.status"
+                                                        class="flex-1 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all">
+                                                        <option value="Negeri">Negeri</option>
+                                                        <option value="Swasta">Swasta</option>
+                                                    </select>
+                                                    <select x-model="selectedSchool.akreditasi"
+                                                        class="w-24 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-center font-bold">
+                                                        <option>A</option>
+                                                        <option>B</option>
+                                                        <option>C</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-5">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-8 h-1 bg-emerald-500 rounded-full"></span>
+                                            <h4
+                                                class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                Kontak & Media Sosial</h4>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email
+                                                    Sekolah</label>
+                                                <div class="relative mt-2">
+                                                    <i
+                                                        class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                                                    <input type="email" x-model="selectedSchool.email"
+                                                        placeholder="kontak@sekolah.sch.id"
+                                                        class="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No.
+                                                    WhatsApp/Telp</label>
+                                                <div class="relative mt-2">
+                                                    <i
+                                                        class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                                                    <input type="text" x-model="selectedSchool.telp" placeholder="08..."
+                                                        class="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
+                                                </div>
+                                            </div>
+                                            <div class="md:col-span-2">
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Website
+                                                    atau Link Instagram</label>
+                                                <div class="relative mt-2">
+                                                    <i
+                                                        class="fas fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                                                    <input type="text" x-model="selectedSchool.web"
+                                                        placeholder="https://..."
+                                                        class="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-5 pb-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="w-8 h-1 bg-purple-500 rounded-full"></span>
+                                            <h4
+                                                class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em]">
+                                                Deskripsi & Lokasi</h4>
+                                        </div>
+                                        <div class="space-y-5">
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Profil
+                                                    Singkat / Visi</label>
+                                                <textarea x-model="selectedSchool.profil" rows="3"
+                                                    placeholder="Gambarkan visi atau profil singkat sekolah..."
+                                                    class="w-full mt-2 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all resize-none"></textarea>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alamat
+                                                    Lengkap</label>
+                                                <textarea x-model="selectedSchool.alamat" rows="3"
+                                                    placeholder="Alamat detail sekolah..."
+                                                    class="w-full mt-2 px-4 py-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all resize-none"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="px-6 py-5 border-t bg-slate-50 flex items-center justify-between shrink-0">
+                            <button @click="showModal = false"
+                                class="px-6 py-3 text-slate-500 hover:bg-slate-200 rounded-2xl transition font-black text-[10px] uppercase tracking-[0.2em]">Batal</button>
+                            <button @click="saveSchool()"
+                                :class="modalType === 'Tambah' ? 'bg-blue-600 shadow-blue-200' : 'bg-amber-500 shadow-amber-200'"
+                                class="px-10 py-3.5 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                                <i class="fas fa-check-circle"></i>
+                                <span x-text="modalType === 'Tambah' ? 'Daftarkan Sekolah' : 'Simpan Perubahan'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    /* Styling scrollbar untuk area konten modal */
+                    .custom-scrollbar::-webkit-scrollbar {
+                        width: 5px;
+                    }
+
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: #e2e8f0;
+                        border-radius: 20px;
+                    }
+
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background: #cbd5e1;
+                    }
+                </style>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div x-show="showDeleteModal" x-cloak
+        class="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden p-6 text-center">
+            <div
+                class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800">Hapus Data?</h3>
+            <p class="text-slate-500 text-xs mt-2 mb-6">Data yang dihapus tidak dapat dikembalikan lagi.</p>
+            <div class="flex gap-2">
+                <button @click="showDeleteModal = false"
+                    class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
+                <button @click="schools = schools.filter(s => s.id !== deleteId); showDeleteModal = false"
+                    class="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition text-xs">Ya,
+                    Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t flex justify-around p-3 z-50">
+        <a href="index.html" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px] mt-1 font-medium">Dasbor</span>
+        </a>
+        <a href="data-sekolah.html" class="flex flex-col items-center text-blue-600">
+            <i class="fas fa-edit text-lg"></i>
+            <span class="text-[10px] mt-1 font-bold">Data</span>
+        </a>
+        <button @click="profileOpen = !profileOpen" class="flex flex-col items-center text-slate-400">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px] mt-1 font-medium">Profil</span>
+        </button>
+    </nav>
+
+</body>
+
+</html>
